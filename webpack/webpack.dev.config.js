@@ -8,6 +8,12 @@ function buildTestConfiguration(moduleToTest)
     targetSpec= {
         mode: "development",
         devtool: "source-maps",
+        devServer: {
+            // .. rest of devserver options
+
+            host: '0.0.0.0',
+            disableHostCheck: true
+        },
         entry: './src/'+moduleToTest+'.js',
         output: {
             path: path.resolve('dist'),

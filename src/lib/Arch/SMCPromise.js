@@ -1,6 +1,6 @@
-import * as SMC from 'Common/Common.js'
+import * as SMC from '../Common.js'
     function g(h) {
-        return "function" == typeof h
+        return SMC.isFunction(h)
     }
 
     function defer(h) {
@@ -8,7 +8,7 @@ import * as SMC from 'Common/Common.js'
         h();
     }
 
-    export function Promise(extend) {
+    export default function SMCPromise(extend) {
     let state;           // undefined/null = pending, true = fulfilled, false = rejected
     let values = [];     // an array of values as arguments for the then() handlers
     let deferred = [];   // functions to call when set() is invoked
@@ -72,12 +72,12 @@ import * as SMC from 'Common/Common.js'
 
     set['then'] = function (onFulfilled, onRejected) {
 
-        let promise2 = Promise(extend);
+        let promise2 = SMCPromise(extend);
         let callCallbacks = function() {
             try {
                 let f = (state ? onFulfilled : onRejected);
                 if (SMC.isFunction(f)) {
-                    function resolve(x) {
+                    let resolve= function(x) {
                         let then, cbCalled = 0;
                         try {
                             if (x && (SMC.isObject(x) || SMC.isFunction(x)) && SMC.isFunction(then = x['then'])) {

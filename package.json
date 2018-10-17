@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "cross-env NODE_ENV=development webpack-dev-server --inline --hot --progress --config ./webpack/webpack.dev.config.js"
+    "dev": "webpack-dev-server --public hogarmania.com:8080 --disable-host-check --inline --hot --progress --config ./webpack/webpack.dev.config.js"
 
   },
   "author": "",
