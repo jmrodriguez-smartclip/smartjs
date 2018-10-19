@@ -47,7 +47,7 @@ export default class ConditionalConfig
     }
     traverseArray (arr) {
         let result=[];
-        arr.forEach(function (x) {
+        arr.forEach((x)=> {
             let newVal=this.checkCond(x);
             result.push(this.traverse(newVal))
         })

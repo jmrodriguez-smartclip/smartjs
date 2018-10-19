@@ -59,6 +59,7 @@ export default class Ad extends Promised
     // Requested se dispara cuando se realiza la peticion de anuncio al backend
     onRequesting()
     {
+        this.fireEvent("AD_REQUEST",{obj:this});
 
         this.adService.requestAd(this);
         this.logger.debug("AD::Requesting")

@@ -87,7 +87,9 @@ let sampleAdConfig={
                     }
                 }
            },
-            "banner":{sizes:[980,200]},
+            "banner":{
+               "ad":{sizes:[980,200]}
+               },
         "intext":{
 
                "ad":{

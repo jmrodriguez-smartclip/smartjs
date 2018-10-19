@@ -8,7 +8,7 @@ import * as SMC from '../Common.js'
         h();
     }
 
-    export default function SMCPromise(extend) {
+    export default function SMCPromise(label) {
     let state;           // undefined/null = pending, true = fulfilled, false = rejected
     let values = [];     // an array of values as arguments for the then() handlers
     let deferred = [];   // functions to call when set() is invoked
@@ -72,7 +72,7 @@ import * as SMC from '../Common.js'
 
     set['then'] = function (onFulfilled, onRejected) {
 
-        let promise2 = SMCPromise(extend);
+        let promise2 = SMCPromise(label);
         let callCallbacks = function() {
             try {
                 let f = (state ? onFulfilled : onRejected);
@@ -101,6 +101,8 @@ import * as SMC from '../Common.js'
                     promise2(state, values);
             }
             catch (e) {
+                console.error("Excepcion en promesa:")
+                console.dir(e);
                 promise2(false, [e]);
             }
         };
@@ -110,8 +112,7 @@ import * as SMC from '../Common.js'
             deferred.push(callCallbacks);
         return promise2;
     };
-    if(extend){
-        set = extend(set);
-    }
+    set.label=label;
+    set.getState=function(){return state;}
     return set;
 };

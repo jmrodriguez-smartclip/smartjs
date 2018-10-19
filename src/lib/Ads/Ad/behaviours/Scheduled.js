@@ -8,3 +8,4 @@ export default class Scheduled extends AdBehaviour
         this.ad.before("Requesting").wait(scheduler.schedule(this.config));
     }
 }
+

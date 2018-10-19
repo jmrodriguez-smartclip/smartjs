@@ -9,7 +9,7 @@ export default class BaseContainer extends Promised{
     }
     initialize()
     {
-        this.prependPromises({"attached":"Configured","destroy":"Destroyed"});
+        this.prependPromises({"gotAd":"Ready","attached":"Configured","destroy":"Destroyed"});
         this.run(["Created","Attached","Configured","Ready","Destroyed"]);
     }
     onCreated()
@@ -59,5 +59,10 @@ export default class BaseContainer extends Promised{
     destroy()
     {
         this.resolve("destroy");
+    }
+    setAd(ad)
+    {
+        this.ad=ad;
+        this.resolve("gotAd");
     }
 }

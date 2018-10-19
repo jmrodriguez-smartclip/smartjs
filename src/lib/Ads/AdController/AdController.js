@@ -1,28 +1,7 @@
 import Promised from '../../Arch/Promised'
 import Ad from '../Ad/Base/Ad'
 import * as Common from "../../Common";
-/* Configuracion :
-  {
-     tags:{sizes:}
-     slots:{
-             "default":{}
-             "id1":{
-                tags:[],
-                container:{type:...},
-                ad:{
-                    sizes:...
-                    targeting:...
-                    "GPT":{
-                            "sizes"...
-                            "adunit"...
-                          }
-                    }
-                }
-             ...
-             ...
 
-
- */
 export default class AdController extends Promised
 {
     constructor(serviceContainer,slotid,node,adConfig)
@@ -42,10 +21,12 @@ export default class AdController extends Promised
     }
     onInitialize()
     {
-        this.ad.attach(this.container);
-        this.container.attachTo(this.domNode);
         this.container.initialize();
         this.ad.initialize();
+        this.ad.attach(this.container);
+        this.container.setAd(this.ad);
+        this.container.attachTo(this.domNode);
+
     }
     onRun()
     {
@@ -54,6 +35,7 @@ export default class AdController extends Promised
     }
     mergeTags()
     {
+
         this.slotConfig = Common.deepmerge({},this.config.slots[this.slotId]);
         if(this.config.slots[this.slotId].tags==undefined) {
             return;
@@ -63,5 +45,9 @@ export default class AdController extends Promised
                 this.slotConfig = Common.deepmerge(this.slotConfig,this.config.tags[tag]);
             }
         })
+        if(this.config.globalSlot!==undefined)
+        {
+            this.slotConfig=Common.deepmerge(this.slotConfig,this.cofig.globalSlot);
+        }
     }
 }

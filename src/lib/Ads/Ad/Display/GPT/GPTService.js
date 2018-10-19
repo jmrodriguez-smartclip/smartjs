@@ -6,13 +6,13 @@ export default class GPTService extends AdService
 {
     onInitialized(){
         /* Se carga la libreria js de google */
-        if(top.googletag===undefined)
-            top.googletag = {
+        if(window.googletag===undefined)
+            window.googletag = {
                 cmd: []
             };
         this.loadPromise=SMCPromise();
         this.loaded=false;
-        this.gt=top.googletag;
+        this.gt=googletag;
         this.slotFromAd={};
         if(this.config.autoload)
             this.load();
@@ -121,9 +121,9 @@ export default class GPTService extends AdService
     }
     onConfigured(){
         this.gt.cmd.push(()=>{
-        this.__log = top.googletag.debug_log.log;
+        this.__log = googletag.debug_log.log;
         var m=this;
-        top.googletag.debug_log.log = function (level, message, service, slot, reference) {
+        googletag.debug_log.log = function (level, message, service, slot, reference) {
             if (message && message.getMessageId && typeof (message.getMessageId()) === 'number') {
                 m.onEvent(message.getMessageId(), slot, message);
             }
@@ -180,7 +180,7 @@ export default class GPTService extends AdService
     {
         if(this.loaded)
             return;
-        var useSSL = 'https:' === top.document.location.protocol;
+        var useSSL = 'https:' === document.location.protocol;
         this.gt.cmd.push(()=> this.resolve("gptPromise"));
         Network.asyncLoad((useSSL ? 'https:' : 'http:') + '//www.googletagservices.com/tag/js/gpt.js')
             .then(()=>{

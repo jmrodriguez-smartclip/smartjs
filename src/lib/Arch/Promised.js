@@ -1,9 +1,11 @@
 import SMCPromise from './SMCPromise';
+import Evented from "./Evented"
 
-export default class Promised
+export default class Promised extends Evented
 {
     constructor()
     {
+        super()
         this._resolvePromises={};
         this._beforePromises={};
         this._finishedPromises={};
@@ -119,7 +121,7 @@ export default class Promised
         for(let k in states)
         {
             if(this._resolvePromises[k]===undefined)
-                this._resolvePromises[k]=SMCPromise();
+                this._resolvePromises[k]=SMCPromise(k);
             this.before(states[k]).wait(this._resolvePromises[k]);
         }
     }

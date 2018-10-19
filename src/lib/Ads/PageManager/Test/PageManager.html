@@ -4,18 +4,23 @@
 	<meta charset="utf-8">
 		<!--<meta name="viewport" content="width=device-width">-->
 	<title>Test</title>
+		<script>
+			SmartJs={slots:[],cmd:[],register:function(e){
+			    var sc=document.getElementsByTagName("script")
+			    SmartJs.slots.push({s:e,n:sc[sc.length-1].parentNode});}};
+		</script>
 	</head>
 <body >
 	<div id="root">
 	</div>
 	<div>
-	<p></p>
-<div id="intext"></div>
+		<p></p>
+		<div><script>SmartJs.register("POSITION2");</script></div>
 		<p></p>
 	</div>
-	<div id="intext2"></div>
+	<div><script>SmartJs.register("POSITION3");</script></div>
 	<p></p>
-	</div>
+
 </body>
 </html>
 

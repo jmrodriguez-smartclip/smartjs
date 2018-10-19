@@ -213,7 +213,7 @@ module.exports = /*
             globalOptions=options;
             if(typeof globalOptions.properties=="undefined")
                 globalOptions.properties={};
-            globalOptions.properties.rand=function(){this.lastResult=parseInt(Math.random()*100);return lastResult;}
+            globalOptions.properties.rand=function(){var lastResult=parseInt(Math.random()*100);return lastResult;}
             options = options !== void 0 ? options : {};
 
             var peg$FAILED = {},
