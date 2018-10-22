@@ -1,7 +1,12 @@
 import BaseContainer from "BaseContainer"
+import GhostContainerService from "lib/GhostContainerService"
+
 class AvaContainer extends BaseContainer
 {
-
+    constructor(ContainerService,config)
+    {
+        super();
+    }
     setAd(ad)
     {
         super.setAd(ad);
@@ -20,4 +25,7 @@ class AvaContainer extends BaseContainer
                     "</style";
         head.insertAdjacentHTML("beforeend",style);
     }
+
 }
+
+

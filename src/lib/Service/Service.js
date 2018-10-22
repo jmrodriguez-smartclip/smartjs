@@ -19,4 +19,8 @@ export default class Service extends Promised {
     {
         return this.serviceContainer.get(name);
     }
+    getContainer()
+    {
+        return this.serviceContainer;
+    }
 }

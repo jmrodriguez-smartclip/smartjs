@@ -6,9 +6,9 @@ import BaseContainer from '../../Container/BaseContainer.js';
 import Scheduler from '../../../Browser/Scheduler';
 import GPTService from "../../Ad/Display/GPT/GPTService";
 import AppNexusService from "../../Ad/Display/AppNexus/AppNexusService";
-import ConsoleLogger from "../../../Log/ConScheduled";
-import Ava from "../../Ad/Video/OutStreamsoleLogger"
-import Scheduled from "../../Ad/behaviours//Ava";
+import ConsoleLogger from "../../../Log/ConsoleLogger";
+import Ava from "../../Ad/Video/OutStream/Ava"
+import Scheduled from "../../Ad/behaviours/Scheduled";
 import Intext from "../../Ad/Video/OutStream/Intext";
 import PageManager from "../PageManager";
 import PageStats from "../../../Browser/PageStats"

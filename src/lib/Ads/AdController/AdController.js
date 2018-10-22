@@ -21,11 +21,12 @@ export default class AdController extends Promised
     }
     onInitialize()
     {
+        this.container.attachTo(this.domNode);
         this.container.initialize();
         this.ad.initialize();
         this.ad.attach(this.container);
         this.container.setAd(this.ad);
-        this.container.attachTo(this.domNode);
+
 
     }
     onRun()

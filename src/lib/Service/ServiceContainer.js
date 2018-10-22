@@ -29,9 +29,8 @@ export default class ServiceContainer
             throw "Unknown service :"+serviceName;
         return this.services[serviceName];
     }
-    find(serviceName)
+    add(serviceName,service)
     {
-
+        this.services[serviceName]=service;
     }
-
 }

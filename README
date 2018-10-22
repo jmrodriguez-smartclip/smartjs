@@ -3,6 +3,6 @@
     yarn run dev --test=lib/Browser/Test/CrossCompat
 
    La url a cargar, en ese caso, es:
-   http://127.0.0.1:<puerto>/lib/Browser/Test/CrossCompat.html
+   http://127.0.0.1:<puerto>/lib/Browser/Test/CrossCompat
 
 */
