@@ -14,18 +14,17 @@ export default class ConsoleLogger extends BaseLogger
                 console.dir(txt[k]);
         }
     }
-    log(index,sourceData,inmediate=0)
+    log(level,module,id,data)
     {
+
         let dstam=new Date();
 
-        for(let k in sourceData)
-        {
-            let c=sourceData[k];
-            console.debug("["+index+"]"+k);
-            for(let j in c)
-            {
-                console.debug("["+index+"]:"+k+":"+j+"="+c[j]);
-            }
-        }
+        console.debug("["+level+"::"+module+(id==null?"":" "+id)+"]:"+JSON.stringify(data));
+    }
+    exception(label,context,data)
+    {
+        let q=new Date();
+        console.error("[["+q.toString()+" "+label+" ]] :: "+context);
+        console.dir(data);
     }
 }

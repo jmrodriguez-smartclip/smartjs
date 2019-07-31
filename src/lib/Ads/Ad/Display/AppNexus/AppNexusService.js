@@ -2,6 +2,7 @@ import AdService from "../../Base/AdService"
 import * as Common from "../../../../Common"
 import * as Network from "../../../../Network";
 import SMCPromise from "../../../../Arch/SMCPromise"
+import AppNexusRequest from "./AppNexusRequest";
 export default class AppNexusService extends AdService
 {
     onInitialized(){
@@ -10,7 +11,7 @@ export default class AppNexusService extends AdService
         {
             window.apntag={anq:[]};
         }
-        this.loadPromise=SMCPromise();
+        this.loadPromise=SMCPromise("AppNexusService:loadPromise");
         this.loaded=false;
         this.apn=window.apntag;
         this.slotFromAd={};
@@ -41,7 +42,9 @@ export default class AppNexusService extends AdService
 
     requestAd(ad)
     {
-
+        let r=new AppNexusRequest(this.serviceContainer,ad);
+        this.displayAd(ad);
+        return r;
     }
     displayAd(ad)
     {
@@ -60,7 +63,8 @@ export default class AppNexusService extends AdService
             this.apn.defineTag({
                 tagId: ad.getServiceParam("AppNexus","adunit"),
                 sizes: ad.getSizes(),
-                targetId: contId
+                targetId: contId,
+                allowSmallerSizes:true
             });
             let targeting=ad.getTargeting();
             this.apn.setKeywords(contId,targeting);
@@ -78,6 +82,10 @@ export default class AppNexusService extends AdService
                 this.loaded=true;
                 this.loadPromise.resolve();
             });
+    }
+    getLabel()
+    {
+        return "AppNexusService";
     }
 
 }

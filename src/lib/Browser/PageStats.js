@@ -4,7 +4,7 @@ import * as Compat from './CrossCompat.js';
 import * as Geometry from './Geometry.js';
 import * as Browser from './Browser';
 import * as UrlInfo from './UrlInfo';
-
+import Timing from './Timing';
 export default class PageStats extends Service
 {
     initialize(){
@@ -80,7 +80,7 @@ export default class PageStats extends Service
         let refererUrl=new UrlInfo.UrlInfo(this.w.document.referrer);
         let bInfo=null;
         bInfo = Browser.browserInfo();
-        let timings=Compat.getTimings();
+        let timings=Timing.getTimings();
         let w=this.w;
         let nRemoteScripts=null;
 
@@ -107,7 +107,7 @@ export default class PageStats extends Service
         }
         let doNotTrack=false;
         if (window.doNotTrack || navigator.doNotTrack || navigator.msDoNotTrack || 'msTrackingProtectionEnabled' in window.external)
-            doNotTrack=(window.doNotTrack == "1" || navigator.doNotTrack == "yes" || navigator.doNotTrack == "1" || navigator.msDoNotTrack == "1" || window.external.msTrackingProtectionEnabled())?true:false;
+            doNotTrack=(window.doNotTrack == "1" || navigator.doNotTrack == "yes" || navigator.doNotTrack == "1" || navigator.msDoNotTrack == "1" || (window.external!=undefined && window.external.msTrackingProtectionEnabled!=undefined && window.external.msTrackingProtectionEnabled()))?true:false;
 
         let hasCMP="unknown";
         try {
@@ -249,5 +249,9 @@ export default class PageStats extends Service
         download.src = imageAddr + cacheBuster;
 
 
+    }
+    getLabel()
+    {
+        return "PageStats";
     }
 }

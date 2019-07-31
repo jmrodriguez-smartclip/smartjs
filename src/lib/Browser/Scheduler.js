@@ -155,4 +155,8 @@ export default class Scheduler extends Service
     if(this.listenerCallbacks[ev]!=undefined)
         this.listenerCallbacks[ev].map(function(f){f.apply()});
     };
+    getLabel()
+    {
+        return "Scheduler";
+    }
 }

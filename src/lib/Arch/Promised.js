@@ -1,18 +1,48 @@
 import SMCPromise from './SMCPromise';
 import Evented from "./Evented"
 
+top.__promisedStore=[];
+top.__debugPromised=function()
+{
+    for(let k=0;k<top.__promisedStore.length;k++)
+    {
+        let i=top.__promisedStore[k];
+        if(i.currentState==null)
+            continue;
+        let cs=i.currentState;
+
+        console.log("Estado de :"+i.getLabel()+" : "+i.stateArray[cs]);
+
+        let allProms=i._resolvePromises[i.currentState];
+
+        if(allProms!==undefined)
+        {
+            for(let h in allProms)
+            {
+                console.log("    "+h+" :: "+allProms[h].getState())
+            }
+        }
+    }
+}
 export default class Promised extends Evented
 {
-    constructor()
+    constructor(serviceContainer)
     {
-        super()
+        super();
+        this.currentState=null;
         this._resolvePromises={};
         this._beforePromises={};
         this._finishedPromises={};
         this._promises={};
         this._afterCallbacks=[];
         this._currentState=null;
-        this._postPromise={};
+        this.nextState=null;
+
+        top.__promisedStore.push(this);
+        serviceContainer.getLoadedPromise().then(()=>{
+
+            this.setLogger(serviceContainer.get("Log"))
+        })
     }
     before(state)
     {
@@ -22,15 +52,15 @@ export default class Promised extends Evented
     waitFinished(state)
     {
         if(this._finishedPromises[state]===undefined)
-            this._finishedPromises[state]=SMCPromise();
+            this._finishedPromises[state]=SMCPromise(this.getLabel()+"::WaitFinished:"+state);
         return this._finishedPromises[state];
     }
     addPromisedState(state)
     {
         if(this._beforePromises[state]===undefined) {
             this._beforePromises[state] = [];
-            this._postPromise[state]=SMCPromise();
-            this._promises[state]=SMCPromise();
+            this._finishedPromises[state]=SMCPromise(this.getLabel()+":_finishedPromise:"+state);
+            this._promises[state]=SMCPromise(this.getLabel()+":_promises:"+state);
         }
     }
     addPromiseToState(state,promise)
@@ -38,73 +68,94 @@ export default class Promised extends Evented
         this.addPromisedState(state);
         this._beforePromises[state].push(promise);
     }
-    /*
-     if(this._beforePromises[state]===undefined) {
-            this._beforePromises[state] = [];
-            this._postPromise[state]=SMCPromise();
-            this._promises[state]=SMCPromise();
-        }
-     */
+
     setState(state)
     {
-        let execOwnCallback=()=>{
-            let outCb="on"+this._currentState+"Finished";
-            if(this[outCb])
-                this[outCb].apply(this);
-            if(this._finishedPromises[this._currentState]!==undefined)
-                this._finishedPromises[this._currentState].resolve();
+        try {
+            // Si existe un metodo llamado before_<state>, se le llama primero, y se aniade la promesa a los
+            // estados "before"
+            if (this["before_" + state] !== undefined)
+                this.addPromiseToState(state, this["before_" + state].apply(this, null));
 
-            if(this["on"+state])
-                this["on"+state].apply(this);
-        }
-        let execCallbacks=function(){
-            if(this._afterCallbacks[state]===undefined)
-                return;
-            this._afterCallbacks[state].map((f)=>f.apply(null));
-        }.bind(this);
+            let execOwnCallback = () => {
+                let outCb = "on" + this._currentState + "Finished";
+                if (this[outCb])
+                    this[outCb].apply(this);
+                if (this._finishedPromises[this._currentState] !== undefined)
+                    this._finishedPromises[this._currentState].resolve();
 
-        if(this._beforePromises[state] === undefined) {
-            return {
-                then: (c) => {
+                if (this["on" + state])
+                    this["on" + state].apply(this);
+            }
+            let execCallbacks = function () {
+                if (this._afterCallbacks[state] === undefined)
+                    return;
+                this._afterCallbacks[state].map((f) => f.apply(null));
+            }.bind(this);
+
+
+            let localPromise = SMCPromise(this.getLabel() + ":LocalPromise:" + state);
+            // Por si el estado actual aun no existe en this._promises
+            this.addPromisedState(state);
+            this._promises[state].all(this._beforePromises[state]).then(() => {
+
+                try {
                     execOwnCallback();
-                    this._currentState=state;
-                    execCallbacks();
-                    c.apply(null);
-                    if(this._finishedPromises[state]===undefined)
-                        this._finishedPromises[state]=SMCPromise();
-                    this._finishedPromises[state].resolve();
-
+                } catch (e) {
+                    this.logger.exception(this.getLabel(), "execOwnCallback :" + state, e);
                 }
-            };
+                this._currentState = state;
+                try {
+                    execCallbacks();
+                } catch (e) {
+                    this.logger.exception(this.getLabel(), "execCallback :" + state, e);
+                }
+                if (this._finishedPromises[state] === undefined)
+                    this._finishedPromises[state] = SMCPromise(this.getLabel() + ":_finishedPromises:" + state);
+                try {
+                    this._finishedPromises[state].resolve();
+                } catch (e) {
+                    this.logger.exception(this.getLabel(), "FinishedPromise :" + state, e);
+                }
+                localPromise.resolve();
+
+            });
+            return localPromise;
+        }catch(e)
+        {
+            this.logger.exception(this.getLabel(), "setState :" + state, e);
         }
-        let localPromise=SMCPromise();
-
-        this._promises[state].all(this._beforePromises[state]).then(()=>{
-
-            execOwnCallback();
-            this._currentState=state;
-            execCallbacks();
-            this._postPromise[state].resolve();
-            localPromise.resolve();
-
-        })
-        return localPromise;
     }
     run(stateArray)
     {
-        let p=SMCPromise();
-        this._runStates(stateArray,0,p);
+        let p=SMCPromise(this.getLabel()+":run");
+        this.stateArray=stateArray;
+        this.currentState=0;
+        this._runStates(stateArray,p);
 
         return p;
     }
-    _runStates(stateArray,index,endPromise)
+    _runStates(stateArray,endPromise)
     {
-        if(index==stateArray.length)
+        if(this.currentState===stateArray.length) {
+            this.debug("END");
             return endPromise.resolve();
+        }
 
-        this.setState(stateArray[index]).then(()=>{
-            index++;
-            this._runStates(stateArray,index,endPromise);
+        this.setState(stateArray[this.currentState]).then(()=>{
+
+            if(this.currentState<stateArray.length)
+                this.debug("STATE SET:"+stateArray[this.currentState]);
+
+            if(this.nextState!==null)
+            {
+                this.currentState=this.nextState;
+                this.nextState=null;
+            }
+            else
+                this.currentState++;
+
+            this._runStates(stateArray,endPromise);
         })
     }
     // Metodo semantico.Permite construcciones del tipo:
@@ -114,23 +165,43 @@ export default class Promised extends Evented
         if(this._finishedPromises[state]!==undefined)
             return this._finishedPromises[state];
         this.addPromisedState(state)
-        return this._postPromise[state];
+        return this._finishedPromises[state];
+    }
+    gotoState(state)
+    {
+        this.nexState=this.stateArray.indexOf(state);
+        if(this.nextState<0)
+            this.nextState=null;
     }
     prependPromises(states)
     {
         for(let k in states)
         {
             if(this._resolvePromises[k]===undefined)
-                this._resolvePromises[k]=SMCPromise(k);
+                this._resolvePromises[k]=SMCPromise(this.getLabel()+":_resolvePromises:"+k);
             this.before(states[k]).wait(this._resolvePromises[k]);
         }
     }
     resolve(state)
     {
         if(this._resolvePromises[state]===undefined)
-            this._resolvePromises[state]=SMCPromise();
+            this._resolvePromises[state]=SMCPromise(this.getLabel()+":_resolvePromises:"+state);
 
         this._resolvePromises[state].resolve();
+    }
+    discard(promises)
+    {
+        promises.map((i)=>{
+            this._resolvePromises[i].resolve();
+        });
+    }
+    getLabel()
+    {
+        return "<Unnamed Promised>";
+    }
+    debug(str)
+    {
+        console.log(this.getLabel()+"::"+str);
     }
 }
 

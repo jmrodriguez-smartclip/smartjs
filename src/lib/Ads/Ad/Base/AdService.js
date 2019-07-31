@@ -2,6 +2,12 @@ import Service from "../../../Service/Service"
 import {deepmerge} from "../../../Common"
 export default class AdService extends Service
 {
+    static get EVENT_SERVICE_LOADED(){ return "EVENT_SERVICE_LOADED";}
+    static get EVENT_SERVICE_ERROR() { return "EVENT_SERVICE_ERROR";}
+    static get ADSERVICE_DISPLAY()   { return "Display";}
+    static get ADSERVICE_VIDEO()     { return "Video";}
+
+
     constructor(serviceContainer,config)
     {
         super(serviceContainer,config);
@@ -9,10 +15,13 @@ export default class AdService extends Service
     }
     initialize()
     {
-        this.prependPromises({"ready":"Ready"});
-        this.run(["Initialized","Configured","Ready"]);
+        this.prependPromises({"destroy":"Destroyed"});
+        this.run(["Initialized","Configured","Ready","Destroyed"]);
     }
+    createRequest(ad)
+    {
 
+    }
     getSlotConfiguration(id)
     {
         let results=[this.config.slots.default || {}];
@@ -40,5 +49,26 @@ export default class AdService extends Service
     }
     configureAd(ad)
     {
+    }
+    getTagName()
+    {
+        return "generic";
+    }
+    getAdServiceType()
+    {
+        return AdService.ADSERVICE_DISPLAY;
+    }
+    destroy()
+    {
+        this.resolve("destroy");
+    }
+    getLabel()
+    {
+        return "AdService";
+    }
+    // A sobreescribir en clases derivadas
+    getNativeSlot(ad)
+    {
+        return null;
     }
 }

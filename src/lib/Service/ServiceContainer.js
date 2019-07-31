@@ -1,12 +1,14 @@
 /** SERVICECONTAINER_IMPORTS **/
+import SMCPromise from "../Arch/SMCPromise"
 export default class ServiceContainer
 {
     constructor(serviceSpec)
     {
         this.spec=serviceSpec;
         this.services={};
-
+        this.servicesLoadedPromise=SMCPromise();
     }
+
     initialize()
     {
         /** SERVICECONTAINER_INITIALIZE **/
@@ -18,6 +20,7 @@ export default class ServiceContainer
         {
             this.services[k]=new (serviceList[k].instance)(this,serviceList[k].config);
         }
+        this.servicesLoadedPromise.resolve();
         for(let k in this.services)
         {
             this.services[k].initialize();
@@ -32,5 +35,9 @@ export default class ServiceContainer
     add(serviceName,service)
     {
         this.services[serviceName]=service;
+    }
+    getLoadedPromise()
+    {
+        return this.servicesLoadedPromise;
     }
 }

@@ -8,6 +8,10 @@ export function isObject(f) {
 export  function isArray  (l) {
     return l.constructor.toString().indexOf("Array")>0;
 };
+export function isString(l)
+{
+    return typeof l==="string";
+}
 export  function isset  (l) {
     return typeof l != "undefined";
 };

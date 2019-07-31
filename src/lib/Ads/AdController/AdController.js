@@ -4,51 +4,91 @@ import * as Common from "../../Common";
 
 export default class AdController extends Promised
 {
-    constructor(serviceContainer,slotid,node,adConfig)
+    constructor(serviceContainer,slotid,DivNode,adConfig)
     {
-        super();
+        super(serviceContainer);
+
         this.slotId=slotid;
         this.config=adConfig;
-        this.domNode=node;
+        this.domNode=DivNode;
         this.serviceContainer=serviceContainer;
+        this.persistedData={};
         this.mergeTags();
     }
     initialize()
     {
+        this.prependPromises({"destroy":"Destroyed"});
+        //this.slotConfig.container.value.node=this.domNode;
         this.container=this.serviceContainer.get("Container").getContainer(this.slotConfig.container);
-        this.ad=new Ad(this.serviceContainer,this.slotId,this.slotConfig,this.config);
-        this.run(["Initialize","Run"])
+        this.buildAd();
+        this.before("Initialize").wait(this.domNode.getPromise());
+        this.run(["Initialize","Run","Destroyed"])
     }
     onInitialize()
     {
-        this.container.attachTo(this.domNode);
+        this.container.attachTo(this.domNode.getNode());
         this.container.initialize();
-        this.ad.initialize();
-        this.ad.attach(this.container);
-        this.container.setAd(this.ad);
-
-
+        this.initializeAd();
     }
+
     onRun()
     {
 
 
     }
+    buildAd()
+    {
+        this.ad=new Ad(this.serviceContainer,this,this.slotId,this.slotConfig,this.config);
+    }
+    initializeAd()
+    {
+        this.ad.initialize();
+        this.ad.attach(this.container);
+        this.container.setAd(this.ad);
+    }
     mergeTags()
     {
 
         this.slotConfig = Common.deepmerge({},this.config.slots[this.slotId]);
-        if(this.config.slots[this.slotId].tags==undefined) {
+        if(this.config.slots[this.slotId].tags===undefined) {
             return;
         }
         this.slotConfig.tags.map((tag)=>{
             if(this.config.tags[tag]!==undefined) {
                 this.slotConfig = Common.deepmerge(this.slotConfig,this.config.tags[tag]);
             }
-        })
+        });
         if(this.config.globalSlot!==undefined)
         {
             this.slotConfig=Common.deepmerge(this.slotConfig,this.cofig.globalSlot);
         }
     }
+    reloadAd()
+    {
+        if(this.ad)
+        {
+            this.ad.destroy();
+        }
+        this.buildAd();
+        this.initializeAd();
+    }
+    persist(source,data)
+    {
+        this.persistedData[source]=data;
+    }
+    retrieve(source)
+    {
+        if(this.persistedData[source]===undefined)
+            return null;
+        return this.persistedData[source];
+    }
+    getLabel()
+    {
+        return "AdController";
+    }
+    destroy()
+    {
+        this.resolve("destroy");
+    }
+
 }

@@ -1,41 +1,20 @@
-
+import * as Common from "../Common";
 export default class BaseLogger
 {
+    static get LOG_ERR(){return "ERR";}
+    static get LOG_INFO()    { return "INFO";}
+    static get LOG_DEBUG()  {return "DEBUG";}
     constructor(config)
     {
-        this.logStack=[];
         this.config=config;
     }
     initialize()
     {
 
     }
-    log(index,sourceData,inmediate=0)
+    log(level,module,id,data)
     {
-        let dstam=new Date();
-        let log= {
-            index: index,
-            timestamp: dstam.getTime()
-        };
-        for(let k in sourceData)
-        {
-            let c=sourceData[k];
-            for(let j in c)
-                log[k+_+j]=c[j];
-        }
-        if(inmediate)
-            this.inmediateSend([log]);
-        else
-            this.logStack.push(log);
+        console.log("[::"+level+"::][ MODULE: "+module+" "+id+"]"+JSON.stringify(data));
     }
-    inmediateSend(dataArray)
-    {
 
-    }
-    flush()
-    {
-        if(this.logStack.length > 0)
-            this.inmediateSend(this.logStack);
-        this.logStack=[];
-    }
 }

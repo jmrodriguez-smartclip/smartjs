@@ -54,7 +54,11 @@ export function onVisibilityChange(element, callback, offset=0 )
     {
         let thresholds=[];
         for(let k=0;k<11;k++)thresholds.push(k/10);
-        let observer=new IntersectionObserver(callback,{root:null,rootMargin:offset+"px",threshold:thresholds});
+        let observer=new IntersectionObserver(
+            (e)=> {
+                callback.apply(null,[e[0].intersectionRatio * 100 ]);
+            },
+            {root:null,rootMargin:offset+"px",threshold:thresholds});
         observer.observe(element);
     }
     else
@@ -64,7 +68,7 @@ export function onVisibilityChange(element, callback, offset=0 )
             let f=function(){
                 let vis=getVisiblePercentage(element);
                 if(vis!==lastPercent && lastPercent!==null)
-                    callback();
+                    callback(vis);
                 lastPercent=vis;
             };
             setInterval(f,100);
@@ -248,56 +252,20 @@ export function getElementCoordinates(element)
 
 export function getScreenWidth() { return window.screen.width;}
 export function getScreenHeight() { return window.screen.height;}
-export function getTimings(w=defaultWindow)
+
+let customStylesheet=null;
+function addCSSRule(selector,rule)
 {
-    if(w.performance.getEntriesByType)
+    if(customStylesheet===null)
     {
-        let res=w.performance.getEntriesByType("navigation");
-        if(res.length==1)
-        {
-            return getTimingsv2(res[0]);
-        }
+        let node=document.createElement("style");
+        node.appendChild(document.createTextNode(""));
+        document.head.appendChild(node);
+        customStylesheet=node.sheet;
     }
-    return getTimingsv1();
+    if(customStylesheet.insertRule!==undefined)
+        customStylesheet.insertRule(selector+" {"+rule+"}",-1);
+    if(customStylesheet.addRule!==undefined)
+        customStylesheet.addRule(selector,rule,-1);
 }
-function getTimingsv2(props)
-{
-    return {
-        timingsVersion:2,
-        loadTime:props.domComplete,
-        loadEventTime:props.loadEventEnd - props.loadEventStart,
-        readyTime:props.domInteractive,
-        readyEventTime:props.domContentLoadedEventEnd-props.domContentLoadedEventStart,
-        networkTime:props.responseEnd-props.requestStart,
-        transferSize:props.transferSize,
-        decodedBodySize:props.decodedBodySize
-    };
-}
-function getTimingsv1()
-{
-    let base=performance.timing;
-    if(base === undefined)
-    {
-        return {
-            timingsVersion:0,
-            loadTime:null,
-            loadEventTime:null,
-            readyTime:null,
-            readyEventTime:null,
-            networkTime:null,
-            transferSize:null,
-            decodedBodySize:null
-        };
-    }
-    let reference=base.connectStart;
-    return {
-        timingsVersion:1,
-        loadTime:base.domComplete - reference,
-        loadEventTime:base.loadEventEnd-base.loadEventStart,
-        readyTime:base.domInteractive-reference,
-        readyEventTime:base.domContentLoadedEventEnd-base.domContentLoadedEventStart,
-        networkTime:base.responseEnd-base.requestStart,
-        transferSize:null,
-        decodedBodySize:null
-    }
-}
+
