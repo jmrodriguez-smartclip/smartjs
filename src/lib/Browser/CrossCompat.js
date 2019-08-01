@@ -126,13 +126,13 @@ export function getVisibleViewportRect(w=defaultWindow)
 export function getYScroll(w=defaultWindow){
     return (w.document.documentElement.scrollTop ?
         w.document.documentElement.scrollTop :
-        w.document.body.scrollTop);
+        w.document.body?w.document.body.scrollTop:0);
 }
 export function getXScroll(w=defaultWindow)
 {
     return (w.document.documentElement.scrollLeft ?
         w.document.documentElement.scrollLeft :
-        w.document.body.scrollLeft);
+        w.document.body?w.document.body.scrollLeft:0);
 }
 
 

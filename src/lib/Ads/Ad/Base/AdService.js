@@ -15,8 +15,8 @@ export default class AdService extends Service
     }
     initialize()
     {
-        this.prependPromises({"destroy":"Destroyed"});
-        this.run(["Initialized","Configured","Ready","Destroyed"]);
+        this.prependPromises({"loaded":"Loading","destroy":"Destroyed"});
+        this.run(["Created","Loading","Initialized","Configured","Ready","Destroyed"]);
     }
     createRequest(ad)
     {

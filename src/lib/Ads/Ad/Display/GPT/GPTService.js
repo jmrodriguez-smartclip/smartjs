@@ -8,21 +8,23 @@ import GPTRequest from "./GPTRequest";
 
 
 export default class GPTService extends AdService {
-    onInitialized() {
+    onCreated(){
         /* Se carga la libreria js de google */
         if (window.googletag === undefined)
             window.googletag = {
                 cmd: []
             };
-        this.loadPromise = SMCPromise("GPTService:LoadPromise");
-        this.loaded = false;
         this.gt = googletag;
         this.slotFromAd = {};
         this.definedSlots = {};
         this.__adFromSlot = {};
-        if (this.config.autoload)
-            this.load();
+
+        this.load();
     }
+    onInitialized() {
+
+    }
+
 
     onConfigured() {
 
@@ -124,7 +126,7 @@ export default class GPTService extends AdService {
         Network.asyncLoad((useSSL ? 'https:' : 'http:') + '//www.googletagservices.com/tag/js/gpt.js')
             .then(() => {
                 this.loaded = true;
-                this.loadPromise.resolve();
+                this.resolve("loaded");
             });
     }
 

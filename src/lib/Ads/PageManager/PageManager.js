@@ -63,8 +63,8 @@ export default class PageManager extends Evented
         let divNode = node;
         if (divNode === undefined) {
             let domNodes = document.getElementsByTagName("script");
-            let scriptNode = domNodes[domNodes.length] - 1;
-            divNode = scriptNode.parentNode();
+            let scriptNode = domNodes[domNodes.length - 1];
+            divNode = scriptNode.parentNode;
         }
         let subDivNode = document.createElement("div");
         subDivNode.id = this.divPrefix + this.divCounter;
@@ -74,7 +74,7 @@ export default class PageManager extends Evented
         let Div=new DivNode({node:subDivNode});
 
         let newController=new AdController(
-            this.serviceContainer,this.divCounter,Div,this.config
+            this.serviceContainer,position,Div,this.config
         );
         this.registerAd(subDivNode.id,newController)
     }

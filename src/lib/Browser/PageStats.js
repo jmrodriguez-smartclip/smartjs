@@ -180,6 +180,27 @@ export default class PageStats extends Service
             cmp:hasCMP
         };
 
+        let wn=window;
+        if(wn.getBattery !== undefined)
+        {
+            wn.getBattery().then((b)=>{data.batteryLevel=b.level;data.batteryCharging=b.charging;})
+        }
+        if(wn.doNotTrack !== undefined)
+            data.doNotTrack=wn.doNotTrack;
+
+        if(wn.connection!==undefined)
+        {
+            let fields = ["downlink", "effectiveType", "rtt", "type", "downlinkMax"];
+            let variables = ["netInfoDownlink", "netInfoEffType", "netInfoRtt", "netInfoType", "netInfoDownlinkMax"];
+            fields.map((value,index)=>{
+                if(wn.connection[value]!==undefined)
+                    data[variables[index]]=wn.connection[value];
+            })
+            if (isNaN(parseFloat(j.netInfoDownlink)))
+                cachedInfo.netInfoDownlink = 0;
+        }
+
+
 
         if(Common.isset(navigator.connection))
         {

@@ -48,7 +48,7 @@ export default class DivNode
     }
     getPromise()
     {
-        return this.createdPromise();
+        return this.createdPromise;
     }
     getParent()
     {

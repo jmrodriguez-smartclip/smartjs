@@ -5,18 +5,21 @@ import SMCPromise from "../../../../Arch/SMCPromise"
 import AppNexusRequest from "./AppNexusRequest";
 export default class AppNexusService extends AdService
 {
-    onInitialized(){
-        /* Se carga la libreria js de google */
+    onCreated()
+    {
         if(window.apntag===undefined)
         {
             window.apntag={anq:[]};
         }
-        this.loadPromise=SMCPromise("AppNexusService:loadPromise");
         this.loaded=false;
         this.apn=window.apntag;
         this.slotFromAd={};
-        if(this.config.autoload)
-            this.load();
+        this.load();
+    }
+
+    onInitialized(){
+        /* Se carga la libreria js de google */
+
     }
     onConfigured(){
         this.apn.anq.push(
@@ -80,7 +83,7 @@ export default class AppNexusService extends AdService
         Network.asyncLoad("//acdn.adnxs.com/ast/ast.js")
             .then(()=>{
                 this.loaded=true;
-                this.loadPromise.resolve();
+                this.resolve("loaded");
             });
     }
     getLabel()

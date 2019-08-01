@@ -763,24 +763,7 @@ export function browserInfo() {
                 browserAgent: ua,
                 cookieEnabled:wn.cookieEnabled===undefined ? null:wn.cookieEnabled,
             }
-            if(wn.getBattery !== undefined)
-            {
-                wn.getBattery().then((b)=>{cachedInfo.batteryLevel=b.level;cachedInfo.batteryCharging=b.charging;})
-            }
-            if(wn.doNotTrack !== undefined)
-                cachedInfo.doNotTrack=wn.doNotTrack;
 
-            if(wn.connection!==undefined)
-            {
-                var fields = ["downlink", "effectiveType", "rtt", "type", "downlinkMax"];
-                var variables = ["netInfoDownlink", "netInfoEffType", "netInfoRtt", "netInfoType", "netInfoDownlinkMax"];
-                fields.map((value,index)=>{
-                    if(wn.connection[value]!==undefined)
-                        cachedInfo[variables[index]]=wn.connection[value];
-                })
-                if (isNaN(parseFloat(j.netInfoDownlink)))
-                    cachedInfo.netInfoDownlink = 0;
-            }
 
         }catch(e){
             cachedInfo = {

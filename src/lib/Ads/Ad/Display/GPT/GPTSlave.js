@@ -1,6 +1,7 @@
 import GPTService from "./GPTService"
 import isset from "../../../../Common"
 import AdController from "../../../AdController/AdController"
+import DivNode from "../../../Container/lib/DivNode"
 
 export default class GPTSlave extends GPTService
 {
@@ -57,10 +58,9 @@ export default class GPTSlave extends GPTService
             googletag.cmd=[
                 ()=>{
                     try {
+                        this.remapGPT();
                         this.resolve("pubads");
-                        this.oldCmd=googletag.cmd;
-                        googletag.cmd=(f)=>{this.parseCommand(f)}
-
+                        this.stack.map((e)=>googletag.cmd.push(e));
                     }catch(e)
                     {
                         this.restoreGpt();
@@ -68,7 +68,7 @@ export default class GPTSlave extends GPTService
                     }
                 }
             ];
-            googletag.cmd.push=(f)=>{this.stack.push(el)}
+            googletag.cmd.push=(f)=>{this.stack.push(f)}
         }
         else
         {
@@ -93,27 +93,33 @@ export default class GPTSlave extends GPTService
         // Creamos un container fake
         // Por ahora, la configuracion del slot es minima.
         // Podria reenviarsele una configuracion de ad distinta.
+        let conf={
+            "ad":{
+                adProvider:"GPTSlave",
+                "sizes":this.getSlotSizes(slot,1),
+                "GPTSlave":{
+                    adunit:slot.getAdUnitPath()
+                }
+            },
+
+        };
+        conf["slots"]={};
+        conf["slots"][divId]={"container":{
+                "type": "Simple",
+                "value": {id: divId}
+            }}
         let newController=new AdController(
             this.serviceContainer,
-            this.divCounter,
+            divId,
             newDiv,
-            {
-                "ad":{
-                    adProvider:"GPTSlave",
-                    "sizes":this.getSizes(slot,1),
-                    "GPTSlave":{
-                        adunit:slot.getAdUnitPath()
-                    }
-                },
-                "container":{
-                    "type":"Simple",
-                    "value":{id:divId}
-                }
-            }
+            conf
         );
         this.divCounter++;
-        pM.registerAd(divId,newController);
+        if(pM!==undefined)
+            pM.registerAd(divId,newController);
         newController.initialize();
+        this.slotFromAd[divId] = slot;
+        this.__adFromSlot[divId]=newController;
         return newController;
     };
     remapGPT()
@@ -121,11 +127,12 @@ export default class GPTSlave extends GPTService
         // Remapeo de defineSlot
         let oldDefineSlot=window.googletag.defineSlot;
 
-        window.googletag.defineSlot=()=>
+        window.googletag.defineSlot=(adunit,sizes,divId)=>
         {
+            let rValue=null;
             try {
-                let rValue = oldDefineSlot.apply(null, arguments);
-                if(!rValue==null)
+                rValue = oldDefineSlot(adunit,sizes,divId)
+                if(rValue==null)
                     return null;
                 let ctr=this.importSlot(rValue);
 
@@ -136,11 +143,23 @@ export default class GPTSlave extends GPTService
                 }
             }catch(e)
             {
-
+                this.logger.exception(this.getLabel(),"defineSlot",e);
             }
 
             return rValue;
         };
+        let oldDisplay=window.googletag.display;
+        window.googletag.display=(divId)=>{
+            if(this.__adFromSlot[divId]===undefined)
+            {
+                let slot=this.getSlotByDivId(divId);
+                if(slot)
+                    this.importSlot(slot);
+                else // Todo : excepcion: se hace display de un slot no definido.
+                    return;
+            }
+
+        }
     }
 
     getSlotSizes(slot,mode)
@@ -207,6 +226,11 @@ export default class GPTSlave extends GPTService
             lP.resolve(returned);
         });
         return lP;
+    }
+
+    configureAd(ad)
+    {
+        return;
     }
 
 }

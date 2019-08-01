@@ -13,14 +13,12 @@ import DivNode from "../../../Container/lib/DivNode"
 export default class IMAService extends AdService {
     initialize()
     {
-        this.prependPromises({
-            "configured": "Configured"
-        });
         this.adsManager=null;
         this.divOverlay=null;
         super.initialize();
     }
-    onInitialized() {
+    onCreated()
+    {
         Network.loadDependencies({
             css:[
                 "https://cdn.smartclip-services.com/v1/Storage-a482323/smartclip-services/sc_player/dependencies/css/videojs.ads.css",
@@ -32,8 +30,11 @@ export default class IMAService extends AdService {
             ]
         }).then(()=>{
 
-            this.resolve("configured");
+            this.resolve("loaded");
         })
+    }
+    onInitialized() {
+
     }
 
     onConfigured() {
@@ -247,7 +248,7 @@ export default class IMAService extends AdService {
     }
     resumeContent(ad)
     {
-        let player=ad.getContainer().getPlayer().getVideoElement();
+        let player=ad.getContainer().getBehaviour("Videojs").getPlayer().getVideoElement();
         player.controls=true;
         player.play();
     }
