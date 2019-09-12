@@ -28,7 +28,10 @@ export default class GPTService extends AdService {
 
     onConfigured() {
 
-        this.gt.cmd.push(() => {
+        this.gt.cmd.push(() => this.setupEvents())
+    }
+    setupEvents()
+    {
             //this.__log = googletag.debug_log.log;
             let m = this;
             /*googletag.debug_log.log = function (level, message, service, slot, reference) {
@@ -54,24 +57,28 @@ export default class GPTService extends AdService {
             pads.disableInitialLoad();
             pads.collapseEmptyDivs();
             this.gt.enableServices();
-        });
-
     }
 
     onReady() {
     }
     requestAd(ad) {
         let r = this.createRequest(ad);
-        this.displayAd(ad);
+        this.gt.cmd.push(()=> {
+            this.callGPTDisplay(ad.getContainer().getId());
+            this.refreshAd(ad);
+        });
         return r;
     }
 
     displayAd(ad) {
-        this.gt.cmd.push(() => {
-            this.refreshAd(ad);
-        });
+
+    }
+    callGPTDisplay(containerId)
+    {
+        this.gt.display(containerId);
     }
     refreshAd(ad) {
+
         this.gt.cmd.push(()=>{
             let slot=this.getNativeSlot(ad);
             if(slot)
@@ -85,12 +92,13 @@ export default class GPTService extends AdService {
 
     configureAd(_ad) {
         this.load();
-        _ad.before("Requesting").wait(this.loadPromise);
+        _ad.before("Requesting").wait(this.isInState("Ready"));
         let m=this;
         if(_ad.getContainer()===null)
             debugger;
 
-
+        let slotConfigured=SMCPromise("SlotConfigured")
+        _ad.before("Ready").wait(slotConfigured);
         this.gt.cmd.push(() => {
 
             let adslot = _ad.getServiceParam("GPT", "adunit");
@@ -115,6 +123,7 @@ export default class GPTService extends AdService {
                 slot.setTargeting(k, targeting[k]);
             this.slotFromAd[contId] = slot;
             this.__adFromSlot[_ad.getContainer().getId()]=_ad;
+            slotConfigured.resolve();
         });
     }
 
@@ -181,13 +190,14 @@ export default class GPTService extends AdService {
     }
 
     onSlotVisibilityChanged(event) {
+
         let slot = event.slot;
         let ad = this.__adFromSlot[slot.getSlotElementId()];
         if (ad === undefined)
             return console.error("Unknown ad from slot " + event.slot.getSlotElementId());
-        if (ad.request == null)
-            return;
-        ad.getCurrentRequest().onVisibilityChange(event.inViewPercentage);
+        let r=ad.getCurrentRequest()
+        if (r != null)
+            r.onVisibilityChange(event.inViewPercentage);
     }
 
     onSlotOnload(event) {

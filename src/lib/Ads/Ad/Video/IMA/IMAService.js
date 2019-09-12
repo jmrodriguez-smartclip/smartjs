@@ -72,10 +72,11 @@ export default class IMAService extends AdService {
         if(this.divOverlay===null)
         {
             let parent=adNode;
-            parent.applyStyles({"position":"relative"});
-            let newDiv=new DivNode({tag:"div",parent:parent});
-            newDiv.applyStyles({position:"absolute",top:"0px",left:"0px"});
-            this.divOverlay=newDiv;
+            let newDiv1=new DivNode({tag:"div",parent:parent});
+            newDiv1.applyStyles({"position":"relative"});
+            let newDiv2=new DivNode({tag:"div",parent:newDiv1});
+            newDiv2.applyStyles({position:"absolute",top:"0px",left:"0px"});
+            this.divOverlay=newDiv2;
         }
         this.currentAd=ad;
 

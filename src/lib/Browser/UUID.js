@@ -55,7 +55,7 @@ function bytesToUuid(buf, offset) {
 }
 
 // Implementa UUID v4 de esa lilbreria.
-export default function UUID(options, buf, offset)
+export default function UUID()
 {
         var rnds = rng();
         // Per 4.4, set bits for version and `clock_seq_hi_and_reserved`

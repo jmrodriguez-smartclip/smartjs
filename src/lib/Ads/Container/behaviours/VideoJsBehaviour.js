@@ -1,6 +1,7 @@
 
 import SMCPromise from "../../../Arch/SMCPromise";
 import ContainerBehaviour from "./ContainerBehaviour"
+import DivNode from "../../Container/lib/DivNode"
 
 export default class VideoJsBehaviour extends ContainerBehaviour
 {

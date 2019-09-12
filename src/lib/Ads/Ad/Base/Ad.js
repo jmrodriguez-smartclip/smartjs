@@ -43,6 +43,7 @@ export default class Ad extends Promised
         this.config=config;
         this.adConfig=slotConfig.ad;
         this.container=null;
+
         this.adService=serviceContainer.get(this.getServiceName());
         this.behaviours={};
         this.serviceContainer=serviceContainer;

@@ -1,98 +1,79 @@
-import * as Compat from '../../../Browser/CrossCompat';
-import ServiceContainer from '../../../Service/ServiceContainer';
-// Las siguientes lineas deberian ser generadas
-import ContainerService from '../../Container/ContainerService';
-import BaseContainer from '../../Container/BaseContainer.js';
-import Scheduler from '../../../Browser/Scheduler';
-import GPTService from "../../Ad/Display/GPT/GPTService";
-import AppNexusService from "../../Ad/Display/AppNexus/AppNexusService";
-import ConsoleLogger from "../../../Log/ConsoleLogger";
-import AvaContainer from "../../../Ads/Container/AvaContainer";
-import Scheduled from "../../Ad/behaviours/Scheduled";
+import Ads from '../Ads'
+import ContainerService from '../Container/ContainerService';
+import BaseContainer from '../Container/BaseContainer.js';
+
+import GPTService from "../Ad/Display/GPT/GPTService";
+import AppNexusService from "../Ad/Display/AppNexus/AppNexusService";
+import ConsoleLogger from "../../Log/ConsoleLogger";
+import AvaContainer from "../../Ads/Container/AvaContainer";
+import Scheduled from "../Ad/behaviours/Scheduled";
 //import SmartXOutStream from "../../Ad/Video/OutStream/SmartXOutStream";
-import PageManager from "../PageManager";
-import PageStats from "../../../Browser/PageStats"
-import Reload from "../../Ad/behaviours/Reloader";
-import VideoPlayerService from "../../../Video/VideoPlayerService";
-import IMAService from "../../Ad/Video/IMA/IMAService";
-import Smartclip from "../../Ad/Video/AdServers/Smartclip";
-import Videojs from "../../../Video/Players/Videojs";
-import VideojsBehaviour from "../../Container/behaviours/VideoJsBehaviour"
-import RailBehaviour from "../../Container/behaviours/RailBehaviour"
-import VideoAdServerService from "../../Ad/Video/AdServers/VideoAdServerService";
+import Reload from "../Ad/behaviours/Reloader";
+import VideoPlayerService from "../../Video/VideoPlayerService";
+import IMAService from "../Ad/Video/IMA/IMAService";
+import Smartclip from "../Ad/Video/AdServers/Smartclip";
+import Videojs from "../../Video/Players/Videojs";
+import VideojsBehaviour from "../Container/behaviours/VideoJsBehaviour"
+import RailBehaviour from "../Container/behaviours/RailBehaviour"
+import VideoAdServerService from "../Ad/Video/AdServers/VideoAdServerService";
 
 /* Comportamientos de containers */
 //import ExpandOnScroll from '../behaviours/ExpandOnScroll';
+Ads.boot(
+    {
+        "Container": {
+            instance: ContainerService,
+            config: {
+                containers: {
+                    "Simple": BaseContainer,
+                    "Ava": AvaContainer
 
-let sContainer=new ServiceContainer(null);
-sContainer.loadServices({
-    "Scheduler":{
-        instance:Scheduler
-    },
-    "Container":{
-        instance:ContainerService,
-        config:{
-            containers:{
-                "Simple":BaseContainer,
-                "Ava":AvaContainer
-
-            },
-            behaviours:{
-                "Videojs":VideojsBehaviour,
-                "Rail":RailBehaviour
-                //"ExpandOnScroll":ExpandOnScroll
+                },
+                behaviours: {
+                    "Videojs": VideojsBehaviour,
+                    "Rail": RailBehaviour
+                    //"ExpandOnScroll":ExpandOnScroll
+                }
             }
-        }
-    },
+        },
 
-    "PageStats":{
-        instance:PageStats,
-        config:{}
-    },
-    "Log":{
-        instance:ConsoleLogger,
-        config:{}
-    },
-    "GPT":{
-        instance:GPTService,
-        config:{}
-    },
-  /*  "SmartXOutStream":{
-        instance:SmartXOutStream,
-        config:{}
-    },*/
-    "AppNexus":{
-        instance:AppNexusService,
-        config:{
-            member: 1024
-        }
-    },
-    "IMA":{
-        instance:IMAService,
-        config:{
-
-        }
-    },
-    "VideoPlayer":{
-        instance:VideoPlayerService,
-        config:{
-            players:{
-                "Videojs":Videojs
+        "GPT": {
+            instance: GPTService,
+            config: {}
+        },
+        /*  "SmartXOutStream":{
+              instance:SmartXOutStream,
+              config:{}
+          },*/
+        "AppNexus": {
+            instance: AppNexusService,
+            config: {
+                member: 1024
             }
+        },
+        "IMA": {
+            instance: IMAService,
+            config: {}
+        },
+        "VideoPlayer": {
+            instance: VideoPlayerService,
+            config: {
+                players: {
+                    "Videojs": Videojs
+                }
+            }
+        },
+        "VideoAdServer": {
+            instance: VideoAdServerService,
+            config: {
+                adServers: {
+                    "Smartclip": Smartclip
+                }
+            }
+
         }
     },
-    "VideoAdServer":{
-        instance:VideoAdServerService,
-        config:{
-            adServers:{
-                "Smartclip":Smartclip
-            }
-        }
-
-    }
-});
-
-let sampleAdConfig={
+    {
     tags:{
         "simpleContainer":{
             container: {
@@ -226,9 +207,4 @@ let sampleAdConfig={
 
         }
     }
-};
-
-
-let inst=new PageManager(sContainer,sampleAdConfig);
-sContainer.add("PageManager",inst);
-inst.initialize();
+});

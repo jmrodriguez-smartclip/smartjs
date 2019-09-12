@@ -63,6 +63,7 @@ export default class BasePlayer extends Promised
 
     createHTMLVideo(divNode)
     {
+
         let src=this.config.src;
         let poster=this.config.poster;
         let v=document.createElement("video");

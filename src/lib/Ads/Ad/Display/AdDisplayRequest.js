@@ -4,8 +4,8 @@ import * as Common from "../../../Common";
 import Ad from "../Base/Ad";
 
 export default class AdDisplayRequest extends AdRequest {
-    constructor(serviceContainer, ad) {
-        super(serviceContainer,ad);
+    constructor(serviceContainer, ad,adServer) {
+        super(serviceContainer,ad,adServer);
        // this.logHelper=new LogHelper(serviceContainer,module,identifier,this)
        // this.logger=serviceContainer.get("Logger");
         var sizes = this.ad.getSizes();

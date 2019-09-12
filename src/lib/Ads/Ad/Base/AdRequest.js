@@ -10,20 +10,27 @@ export default class AdRequest extends Promised {
         super(serviceContainer);
         this.ad = ad;
         this.adid = ad.id;
+        this.adServer=adServer;
         this.requestId=UUID();
-        this.type=this.getType();
         this.creationTime=Timing.timestamp();
-        this.log("CREATED",{
-            creationTime:this.creationTime,
-            creationLocalTime:this.toRelative()
-        });
+        this.log("CREATED",this.getBasicInformation({}));
         this.viewable=false;
         this.loaded=false;
         this.gotImpression=false;
         this.requested=false;
         this.empty=false;
 
+    }
+    getBasicInformation(prevData)
+    {
 
+        return Object.assign(prevData,{
+                creationTime:this.creationTime,
+                creationLocalTime:this.toRelative(),
+                adProvider:this.ad.getServiceName(),
+                adType:this.getType(),
+                containerId:this.ad.getContainer().getId()
+            });
     }
     onRequested() {
         this.requested=true;

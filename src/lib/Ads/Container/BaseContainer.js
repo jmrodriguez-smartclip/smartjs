@@ -12,6 +12,12 @@ export default class BaseContainer extends Promised{
         this.configured=false;
         this.containerService=ContainerService;
         this.behaviours=[];
+        if(config.behaviours!==undefined)
+        {
+            for(let k in config.behaviours)
+                this.behaviours.push(config.behaviours[k])
+        }
+
         this.behaviourInstances={};
     }
     initialize()

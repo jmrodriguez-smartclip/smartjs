@@ -4,8 +4,9 @@ export default class BaseLogger
     static get LOG_ERR(){return "ERR";}
     static get LOG_INFO()    { return "INFO";}
     static get LOG_DEBUG()  {return "DEBUG";}
-    constructor(config)
+    constructor(serviceContainer,config)
     {
+        this.serviceContainer=serviceContainer;
         this.config=config;
     }
     initialize()

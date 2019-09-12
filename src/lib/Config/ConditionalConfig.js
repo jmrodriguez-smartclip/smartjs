@@ -1,3 +1,6 @@
+/**
+ * DEPRECATED.
+ */
 import * as Parser from "../Parser/Conditionals"
 export default class ConditionalConfig
 {

@@ -21,6 +21,7 @@ export function onUnload(callback,w=defaultWindow)
 {
     w.addEventListener("unload",callback, false);
 }
+
 export function isPageHidden(w=defaultWindow)
 {
     let d=w.document;
@@ -56,7 +57,7 @@ export function onVisibilityChange(element, callback, offset=0 )
         for(let k=0;k<11;k++)thresholds.push(k/10);
         let observer=new IntersectionObserver(
             (e)=> {
-                callback.apply(null,[e[0].intersectionRatio * 100 ]);
+                callback.apply(null,[e[0].intersectionRatio * 100 , e]);
             },
             {root:null,rootMargin:offset+"px",threshold:thresholds});
         observer.observe(element);
@@ -95,6 +96,7 @@ export function onError(callback,w=defaultWindow)
 {
     w.addEventListener('error', callback);
 }
+
 export function getViewportHeight(w=defaultWindow) {
     let d = document,
         e = d.documentElement,

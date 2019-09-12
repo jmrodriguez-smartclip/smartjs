@@ -1,3 +1,5 @@
+import SMCPromise from "../../../../Arch/SMCPromise"
+import Ad from "../../Base/Ad"
 import GPTService from "./GPTService"
 import isset from "../../../../Common"
 import AdController from "../../../AdController/AdController"
@@ -7,10 +9,14 @@ export default class GPTSlave extends GPTService
 {
     constructor(serviceContainer,config)
     {
-        super(serviceContainer,config);
 
+        super(serviceContainer,config);
+        /* displayPromises almacena una promesa que se aniade al estado Requesting de cada ad,
+           que impide que pase a ese estado, hasta que no haya una llamada directa a display.
+         */
+        this.displayPromises={};
         this.stack=[];
-        this.oldCmd=null;
+        this.oldDisplay=null;
         this.gpt=null;
         this.divCounter=0;
         Object.defineProperty(window,"googletag",{
@@ -60,7 +66,10 @@ export default class GPTSlave extends GPTService
                     try {
                         this.remapGPT();
                         this.resolve("pubads");
-                        this.stack.map((e)=>googletag.cmd.push(e));
+                        this.stack.map((e)=> {
+                            googletag.cmd.push(e)
+
+                        });
                     }catch(e)
                     {
                         this.restoreGpt();
@@ -86,6 +95,7 @@ export default class GPTSlave extends GPTService
 
     importSlot(slot, message,evType)
     {
+        try{
         let pM=this.serviceContainer.get("PageManager");
         let adM=this.serviceContainer.get("AdService");
         let divId = slot.getSlotElementId();
@@ -93,34 +103,58 @@ export default class GPTSlave extends GPTService
         // Creamos un container fake
         // Por ahora, la configuracion del slot es minima.
         // Podria reenviarsele una configuracion de ad distinta.
-        let conf={
-            "ad":{
-                adProvider:"GPTSlave",
-                "sizes":this.getSlotSizes(slot,1),
-                "GPTSlave":{
-                    adunit:slot.getAdUnitPath()
-                }
-            },
+        let conf={tags:{},slots:{}};
+        let adConf={
+            adProvider:"GPTSlave",
+            "sizes":this.getSlotSizes(slot,1),
+            "GPTSlave":{
+                adunit:slot.getAdUnitPath()
+            }
+        }
 
-        };
-        conf["slots"]={};
-        conf["slots"][divId]={"container":{
+
+        if(this.config.slots!==undefined)
+        {
+            if(this.config.slots[divId]!==undefined)
+                adConf=Object.assign(adConf,this.config.slots[divId]);
+        }
+
+        conf["slots"][divId]= {
+            "tags":[],
+            "enabled":true,
+            "ad":adConf,
+            "container":{
                 "type": "Simple",
                 "value": {id: divId}
-            }}
+            }
+        }
+
+
+
         let newController=new AdController(
             this.serviceContainer,
             divId,
             newDiv,
-            conf
+            conf,
+            {slots:{}}
         );
         this.divCounter++;
         if(pM!==undefined)
             pM.registerAd(divId,newController);
-        newController.initialize();
         this.slotFromAd[divId] = slot;
-        this.__adFromSlot[divId]=newController;
+
+        let ad=newController.getAd();
+        this.displayPromises[divId]=SMCPromise();
+        ad.before(Ad.STATE_READY).wait(this.displayPromises[divId]);
+        newController.initialize();
+        this.__adFromSlot[divId]=ad;
         return newController;
+        }
+        catch(e)
+        {
+            this.logger.exception(this.getLabel(),"importSlot",e);
+            return null;
+        }
     };
     remapGPT()
     {
@@ -148,18 +182,34 @@ export default class GPTSlave extends GPTService
 
             return rValue;
         };
-        let oldDisplay=window.googletag.display;
-        window.googletag.display=(divId)=>{
-            if(this.__adFromSlot[divId]===undefined)
-            {
-                let slot=this.getSlotByDivId(divId);
-                if(slot)
-                    this.importSlot(slot);
-                else // Todo : excepcion: se hace display de un slot no definido.
-                    return;
-            }
+        if(this.oldDisplay===null) {
+            this.oldDisplay = window.googletag.display;
+            window.googletag.display = (divId) => {
+                if (this.__adFromSlot[divId] === undefined) {
+                    let slot = this.getSlotByDivId(divId);
+                    if (slot)
+                        this.importSlot(slot);
+                    else // Todo : excepcion: se hace display de un slot no definido.
+                        return;
+                }
+                this.displayPromises[divId].resolve();
+                this.callGPTDisplay(divId)
 
+            }
         }
+        let oldRef=window.googletag.pubads().refresh;
+        window.googletag.pubads().refresh=function(){
+            oldRef.apply(null,arguments);
+        }
+        this.setupEvents();
+
+    }
+    callGPTDisplay(containerId)
+    {
+
+        this.oldDisplay(containerId);
+
+        //this.oldDisplay(containerId);
     }
 
     getSlotSizes(slot,mode)
@@ -187,21 +237,10 @@ export default class GPTSlave extends GPTService
         })
         super.initialize();
     }
-
-    onConfigured()
-    {
-        super.onConfigured()
-    }
-
-    onReady() {
-        this.stack.map((code)=>{
-
-        });
-        super.onReady();
-    }
+    onConfigured(){}
 
     getSlotByDivId(divId) {
-        let slots = top.googletag.pubads().getSlots();
+        let slots = googletag.pubads().getSlots();
         for (let k = 0; k < slots.length; k++) {
             let id = slots[k].getSlotElementId();
             if (id == divId) return slots[k];

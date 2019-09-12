@@ -4,6 +4,7 @@ import ServiceContainer from '../../../../../Service/ServiceContainer';
 import ContainerService from '../../../../Container/ContainerService';
 import BaseContainer from '../../../../Container/BaseContainer.js';
 import Scheduler from '../../../../../Browser/Scheduler';
+import Scheduled from '../../../../Ad/behaviours/Scheduled'
 import GPTSlave from "../GPTSlave";
 import AvaContainer from "../../../../Container/AvaContainer";
 import VideojsBehaviour from "../../../../Container/behaviours/VideoJsBehaviour";
@@ -34,15 +35,25 @@ sContainer.loadServices({
         instance:ConsoleLogger,
         config:{}
     },
-    "GPT":{
-        instance:GPTService,
-        config:{}
-    },
     "GPTSlave":{
         instance:GPTSlave,
-        config:{}
+        config:{
+            "slots": {
+                "div-gpt-ad-1537188197472-0": {
+                    "behaviours": {
+                        "Schedule": {
+                            "type": Scheduled,
+                            "config": {
+                                when: "LOAD",
+                                timeout: 5000
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 });
 
 let slave=sContainer.get("GPTSlave");
-slave.initialize();
+//slave.initialize();

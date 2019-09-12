@@ -36,6 +36,12 @@ export default class ServiceContainer
     {
         this.services[serviceName]=service;
     }
+    append(serviceName,serviceConfig)
+    {
+
+        this.services[serviceName]=new (serviceConfig.instance)(this,serviceConfig.config);
+        this.servicesLoadedPromise.then(()=>{this.services[serviceName].initialize()})
+    }
     getLoadedPromise()
     {
         return this.servicesLoadedPromise;

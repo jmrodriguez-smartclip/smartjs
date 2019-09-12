@@ -14,13 +14,14 @@ export default class AdController extends Promised
         this.serviceContainer=serviceContainer;
         this.persistedData={};
         this.mergeTags();
+        this.container=this.serviceContainer.get("Container").getContainer(this.slotConfig.container);
+        this.buildAd();
     }
     initialize()
     {
         this.prependPromises({"destroy":"Destroyed"});
         //this.slotConfig.container.value.node=this.domNode;
-        this.container=this.serviceContainer.get("Container").getContainer(this.slotConfig.container);
-        this.buildAd();
+
         this.before("Initialize").wait(this.domNode.getPromise());
         this.run(["Initialize","Run","Destroyed"])
     }
@@ -39,6 +40,10 @@ export default class AdController extends Promised
     buildAd()
     {
         this.ad=new Ad(this.serviceContainer,this,this.slotId,this.slotConfig,this.config);
+    }
+    getAd()
+    {
+        return this.ad;
     }
     initializeAd()
     {
