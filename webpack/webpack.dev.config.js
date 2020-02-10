@@ -36,12 +36,14 @@ function buildTestConfiguration(moduleToTest)
 
     console.log("FILENAME:"+moduleToTest);
     const HtmlWebpackPlugin = require('html-webpack-plugin');
-    const HtmlWebpackPluginConfig = new HtmlWebpackPlugin({
+    let opts={
         template:'./src/'+moduleToTest+'.html',
         filename:moduleToTest+'.html',
         inject:'head',
         alwaysWriteToDisk: true
-    });
+    };
+    const HtmlWebpackPluginConfig = new HtmlWebpackPlugin(opts);
+    console.log("TEMPLATE::"+opts.template+" FILE:"+opts.filename)
     console.log("**************INJECTED****************");
     targetSpec.plugins.push(HtmlWebpackPluginConfig);
     targetSpec.plugins.push(new HtmlWebpackHarddiskPlugin());
